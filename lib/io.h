@@ -29,10 +29,10 @@
 /*
  * 03-Apr-2005
  * DRI: Rob Braun <bbraun@synack.net>
- */
-/*
  * Portions Copyright 2006, Apple Computer, Inc.
  * Christopher Ryan <ryanc@apple.com>
+ * 2018
+ * Carys Tryhorn <carys@carystryhorn.net>
 */
 
 #ifndef _XAR_IO_H_
@@ -88,8 +88,7 @@ int32_t xar_attrcopy_from_heap_to_stream_end(xar_stream *stream);
 
 int32_t xar_heap_to_archive(xar_t x);
 
-#pragma mark internal
-
+// Internal
 // IMPORTANT: Keep count synchronized with declaration in io.c!
 extern struct datamod xar_datamods[6];
 

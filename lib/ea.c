@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Rob Braun
+ * Copyright (c) 2005-2007 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+ * 2018
+ * Carys Tryhorn <carys@carystryhorn.net>
+*/
 #include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -67,7 +71,7 @@ xar_ea_t xar_ea_new(xar_file_t f, const char *name)
 	xar_prop_setvalue(XAR_EA(ret)->prop, NULL);
 	XAR_PROP(XAR_EA(ret)->prop)->attrs = xar_attr_new();
 	XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->key = strdup("id");
-	asprintf((char **)&XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->value, "%lld", XAR_FILE(f)->nexteaid++);
+	asprintf((char **)&XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->value, "%ld", XAR_FILE(f)->nexteaid++);
 
 	xar_prop_pset(f, XAR_EA(ret)->prop, "name", name);
 	

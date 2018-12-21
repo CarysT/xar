@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2008 Rob Braun
+ * Copyright (c) 2005-2007 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,11 @@
 /*
  * 03-Apr-2005
  * DRI: Rob Braun <bbraun@synack.net>
- */
-/*
  * Portions Copyright 2006, Apple Computer, Inc.
  * Christopher Ryan <ryanc@apple.com>
- */
+ * 2018
+ * Carys Tryhorn <carys@carystryhorn.net>
+*/
 
 #define _FILE_OFFSET_BITS 64
 
@@ -462,7 +462,7 @@ int xar_close(xar_t x) {
 	if( XAR(x)->heap_fd != -1 ) {
 		char *tmpser;
 		void *rbuf, *wbuf = NULL;
-		int fd, r, off, wbytes, rbytes;
+		int fd, r, off, wbytes;
 		long rsize, wsize;
 		z_stream zs;
 		uint64_t ungztoc, gztoc;
@@ -791,7 +791,8 @@ const char *xar_opt_get(xar_t x, const char *option) {
  * Returns: 0 for sucess, -1 for failure
  */
 int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
-	xar_attr_t currentAttr, a;
+	//xar_attr_t currentAttr, a;
+	xar_attr_t a;
 
 	if( (strcmp(option, XAR_OPT_TOCCKSUM) == 0) ) {
 		XAR(x)->heap_offset = xar_io_get_toc_checksum_length_for_type(value);
@@ -1566,11 +1567,7 @@ static int32_t xar_unserialize(xar_t x) {
 								f = xar_file_unserialize(x, NULL, reader);
 								XAR_FILE(f)->next = XAR(x)->files;
 								XAR(x)->files = f;
-							} else if( strcmp((const char*)name, "signature") == 0
-#ifdef __APPLE__
-                                      || strcmp((const char*)name, "x-signature") == 0
-#endif
-                                      ){
+							} else if( strcmp((const char*)name, "signature") == 0 ){
 								xar_signature_t sig = NULL;			
 								sig = xar_signature_unserialize(x, reader );
 								

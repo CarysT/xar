@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2008 Rob Braun
+ * Copyright (c) 2005-2007 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,10 @@
 /*
  * 03-Apr-2005
  * DRI: Rob Braun <bbraun@synack.net>
- */
-/*
  * Portions Copyright 2006, Apple Computer, Inc.
  * Christopher Ryan <ryanc@apple.com>
+ * 2018
+ * Carys Tryhorn <carys@carystryhorn.net>
 */
 
 #define _FILE_OFFSET_BITS 64
@@ -445,9 +445,7 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callba
 	size_t bsize, def_bsize;
 	int64_t fsize, inc = 0, seekoff, readsofar = 0;
 	void *inbuf;
-	const char *opt;
-	xar_prop_t tmpp;
-
+	
 	memset(modulecontext, 0, sizeof(void*)*modulecount);
 
 	def_bsize = xar_io_get_rsize(x);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Rob Braun
+ * Copyright (c) 2005-2007 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,9 @@
 /*
  * 03-Apr-2005
  * DRI: Rob Braun <bbraun@synack.net>
- */
-
+ * 2018
+ * Carys Tryhorn <carys@carystryhorn.net>
+*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
