@@ -40,13 +40,12 @@ void heap_check(int fd, const char *name, const char *prop, off_t offset, off_t 
 	char *formattedmd5;
 
 	fprintf(stderr, "Heap checking %s %s at offset: %" PRIu64 "\n", name, prop, HeapOff+offset);
-	OpenSSL_add_all_digests();
 	md = EVP_get_digestbyname("md5");
 	if( md == NULL ) {
 		fprintf(stderr, "No md5 digest in openssl\n");
 		exit(1);
 	}
-	EVP_DigestInit(&ctx, md);
+	EVP_DigestInit_ex(&ctx, md);
 
 	buf = malloc(length);
 	if( !buf ) {
@@ -66,7 +65,8 @@ void heap_check(int fd, const char *name, const char *prop, off_t offset, off_t 
 		exit(1);
 	}
 	EVP_DigestUpdate(&ctx, buf, length);
-	EVP_DigestFinal(&ctx, md5str, &len);
+	EVP_DigestFinal_ex(&ctx, md5str, &len);
+	EVP_MD_CTX_free(ctx);
 
 	formattedmd5 = xar_format_md5(md5str);
 	if( strcmp(formattedmd5, csum) != 0 ) {
