@@ -41,12 +41,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <zlib.h>
-#ifdef __APPLE__
-#include <CommonCrypto/CommonDigest.h>
-#include <CommonCrypto/CommonDigestSPI.h>
-#else
 #include <openssl/evp.h>
-#endif
 
 #include "xar.h"
 #include "hash.h"
