@@ -70,7 +70,7 @@ xar_hash_t xar_hash_new(const char *digest_name, void *context) {
 		HASH_CTX(hash)->context = context;
 	
 	HASH_CTX(hash)->type = EVP_get_digestbyname(digest_name);
-	EVP_DigestInit(&HASH_CTX(hash)->digest, HASH_CTX(hash)->type);
+	EVP_DigestInit(&HASH_CTX(hash)->&digest, HASH_CTX(hash)->type);
 	
 	HASH_CTX(hash)->digest_name = strdup(digest_name);
 	
@@ -86,7 +86,7 @@ const char *xar_hash_get_digest_name(xar_hash_t hash) {
 }
 
 void xar_hash_update(xar_hash_t hash, void *buffer, size_t nbyte) {
-	EVP_DigestUpdate(&HASH_CTX(hash)->digest, buffer, nbyte);
+	EVP_DigestUpdate(&HASH_CTX(hash)->&digest, buffer, nbyte);
 }
 
 void *xar_hash_finish(xar_hash_t hash, size_t *nbyte) {
@@ -94,8 +94,7 @@ void *xar_hash_finish(xar_hash_t hash, size_t *nbyte) {
 	if( ! buffer )
 		return NULL;
 	
-	EVP_DigestFinal(&HASH_CTX(hash)->digest, buffer, &HASH_CTX(hash)->length);
-	EVP_MD_CTX_free(digest);
+	EVP_DigestFinal(&HASH_CTX(hash)->&digest, buffer, &HASH_CTX(hash)->length);
 	
 	*nbyte = HASH_CTX(hash)->length;
 	free((void *)HASH_CTX(hash)->digest_name);
