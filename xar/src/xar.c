@@ -783,7 +783,7 @@ static void print_version() {
 int main(int argc, char *argv[]) {
 	int ret;
 	char *filename = NULL;
-	char command = 0, c;
+	signed char command = 0, c;
 	char **args;
 	const char *tocfile = NULL;
 	int arglen, i, err;

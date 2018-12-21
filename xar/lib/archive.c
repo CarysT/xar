@@ -390,7 +390,8 @@ xar_t xar_open(const char *file, int32_t flags) {
 			return NULL;
 		}
         
-		XAR(ret)->heap_offset = xar_get_heap_offset(ret) + offset;
+		XAR(ret)->heap_offset =
+			XAR(ret)->toc_count + sizeof(xar_header_t) + offset;
 		if( lseek(XAR(ret)->fd, XAR(ret)->heap_offset, SEEK_SET) == -1 ) {
 			xar_close(ret);
 			return NULL;
