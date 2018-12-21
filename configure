@@ -3441,7 +3441,7 @@ if test "x$CFLAGS" = "x" ; then
   no_CFLAGS="yes"
 fi
 if test "x$no_CFLAGS" = "xyes" -a "x$GCC" = "xyes" ; then
-  CFLAGS="-Wall -g"
+  CFLAGS="-Wall -g -lssl -lcrypto"
 fi
 if test "x$EXTRA_CFLAGS" != "x" ; then
   CFLAGS="$CFLAGS $EXTRA_CFLAGS"
