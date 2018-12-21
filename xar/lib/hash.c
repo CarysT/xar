@@ -97,7 +97,8 @@ struct __xar_hash_t {
 #ifdef __APPLE__
 	CCDigestRef digest;
 #else
-	EVP_MD_CTX digest = EVP_MD_CTX_new();
+	EVP_MD_CTX digest;
+	digest = EVP_MD_CTX_new();
 	const EVP_MD *type;
 #endif
 	unsigned int length;
