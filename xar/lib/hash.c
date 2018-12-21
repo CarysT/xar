@@ -97,8 +97,7 @@ struct __xar_hash_t {
 #ifdef __APPLE__
 	CCDigestRef digest;
 #else
-	EVP_MD_CTX digest;
-	digest = EVP_MD_CTX_new();
+	EVP_MD_CTX *digest;
 	const EVP_MD *type;
 #endif
 	unsigned int length;
@@ -119,8 +118,7 @@ xar_hash_t xar_hash_new(const char *digest_name, void *context) {
 #else
 	OpenSSL_add_all_digests();
 	HASH_CTX(hash)->type = EVP_get_digestbyname(digest_name);
-	EVP_DigestInit_ex(&HASH_CTX(hash)->digest, HASH_CTX(hash)->type, NULL);
-	//EVP_DigestInit(&HASH_CTX(hash)->digest, HASH_CTX(hash)->type);
+	EVP_DigestInit(&HASH_CTX(hash)->digest, HASH_CTX(hash)->type);
 #endif
 	
 	HASH_CTX(hash)->digest_name = strdup(digest_name);
@@ -157,8 +155,7 @@ void *xar_hash_finish(xar_hash_t hash, size_t *nbyte) {
 	CCDigestFinal(HASH_CTX(hash)->digest, buffer);
 	CCDigestDestroy(HASH_CTX(hash)->digest);
 #else
-	EVP_DigestFinal_ex(&HASH_CTX(hash)->digest, buffer, &HASH_CTX(hash)->length);
-	EVP_MD_CTX_free(digest);
+	EVP_DigestFinal(&HASH_CTX(hash)->digest, buffer, &HASH_CTX(hash)->length);
 #endif
 	
 	*nbyte = HASH_CTX(hash)->length;
