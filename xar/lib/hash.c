@@ -1,52 +1,9 @@
-/*
- * Copyright (c) 2005-2007 Rob Braun
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of Rob Braun nor the names of his contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-/*
- * 03-Apr-2005
- * DRI: Rob Braun <bbraun@synack.net>
- */
-/*
- * Portions Copyright 2006, Apple Computer, Inc.
- * Christopher Ryan <ryanc@apple.com>
-*/
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <zlib.h>
-#ifdef __APPLE__
-#include <CommonCrypto/CommonDigest.h>
-#include <CommonCrypto/CommonDigestSPI.h>
-#else
 #include <openssl/evp.h>
-#endif
 
 #include "xar.h"
 #include "hash.h"
@@ -55,51 +12,13 @@
 #include "asprintf.h"
 #endif
 
-
 #pragma mark Hash Wrapper Object
-
-#ifdef __APPLE__
-
-CCDigestRef digestRef_from_name(const char* name, unsigned int *outHashSize) {
-    CCDigestRef result = NULL;
-    
-    if (NULL != outHashSize)
-        *outHashSize = 0;
-    
-	if (0 == strcasecmp(name, "sha512")) {
-        result = CCDigestCreate(kCCDigestSHA512);
-        if (NULL != outHashSize)
-            *outHashSize = CC_SHA512_DIGEST_LENGTH;
-    } else if (0 == strcasecmp(name, "sha256")) {
-        result = CCDigestCreate(kCCDigestSHA256);
-        if (NULL != outHashSize)
-            *outHashSize = CC_SHA256_DIGEST_LENGTH;
-    } else if (0 == strcasecmp(name, "sha") || !strcasecmp(name, "sha1")) {
-        result = CCDigestCreate(kCCDigestSHA1);
-        if (NULL != outHashSize)
-            *outHashSize = CC_SHA1_DIGEST_LENGTH;
-#ifdef XAR_SUPPORT_MD5
-    } else if (0 == strcasecmp(name, "md5")) {
-        result = CCDigestCreate(kCCDigestMD5);
-        if (NULL != outHashSize)
-            *outHashSize = CC_MD5_DIGEST_LENGTH;
-#endif // XAR_SUPPORT_MD5
-    }
-	
-    return result;
-}
-#endif // __APPLE__
-
 
 struct __xar_hash_t {
 	const char *digest_name;
 	void *context;
-#ifdef __APPLE__
-	CCDigestRef digest;
-#else
 	EVP_MD_CTX *digest;
 	const EVP_MD *type;
-#endif
 	unsigned int length;
 };
 
@@ -113,13 +32,9 @@ xar_hash_t xar_hash_new(const char *digest_name, void *context) {
 	if( context )
 		HASH_CTX(hash)->context = context;
 	
-#ifdef __APPLE__
-	HASH_CTX(hash)->digest = digestRef_from_name(digest_name, &HASH_CTX(hash)->length);
-#else
 	OpenSSL_add_all_digests();
 	HASH_CTX(hash)->type = EVP_get_digestbyname(digest_name);
 	EVP_DigestInit(&HASH_CTX(hash)->digest, HASH_CTX(hash)->type);
-#endif
 	
 	HASH_CTX(hash)->digest_name = strdup(digest_name);
 	
@@ -135,28 +50,15 @@ const char *xar_hash_get_digest_name(xar_hash_t hash) {
 }
 
 void xar_hash_update(xar_hash_t hash, void *buffer, size_t nbyte) {
-#ifdef __APPLE__
-	CCDigestUpdate(HASH_CTX(hash)->digest, buffer, nbyte);
-#else
 	EVP_DigestUpdate(&HASH_CTX(hash)->digest, buffer, nbyte);
-#endif
 }
 
 void *xar_hash_finish(xar_hash_t hash, size_t *nbyte) {
-#ifdef __APPLE__
-	void *buffer = calloc(1, CC_SHA512_DIGEST_LENGTH); // current biggest digest size  This is what OpenSSL uses
-#else
 	void *buffer = calloc(1, EVP_MAX_MD_SIZE);
-#endif
 	if( ! buffer )
 		return NULL;
 	
-#ifdef __APPLE__
-	CCDigestFinal(HASH_CTX(hash)->digest, buffer);
-	CCDigestDestroy(HASH_CTX(hash)->digest);
-#else
 	EVP_DigestFinal(&HASH_CTX(hash)->digest, buffer, &HASH_CTX(hash)->length);
-#endif
 	
 	*nbyte = HASH_CTX(hash)->length;
 	free((void *)HASH_CTX(hash)->digest_name);
