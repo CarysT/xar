@@ -62,9 +62,7 @@
 #include <errno.h>
 #include <libxml/hash.h>
 #include <libxml/xmlstring.h>
-#ifdef HAVE_SYS_ACL_H
 #include <sys/acl.h>
-#endif
 #include "xar.h"
 #include "arcmod.h"
 #include "archive.h"
@@ -118,8 +116,6 @@ static xar_file_t xar_link_lookup(xar_t x, dev_t dev, ino_t ino, xar_file_t f) {
 }
 
 static int32_t aacls(xar_t x, xar_file_t f, const char *file) {
-#ifdef HAVE_SYS_ACL_H
-#if !defined(__APPLE__)
 	acl_t a;
 	const char *type;
 
@@ -165,36 +161,10 @@ NEXT:
 		acl_free(a);
 	}
 DONE:
-#else /* !__APPLE__ */
-	acl_entry_t e = NULL;
-	acl_t a;
-	int i;
-
-	if( !xar_check_prop(x, "acl") )
-		return 0;
-
-	a = acl_get_file(file, ACL_TYPE_EXTENDED);
-	if( !a )
-		return 0;
-
-	for( i = 0; acl_get_entry(a, e == NULL ? ACL_FIRST_ENTRY : ACL_NEXT_ENTRY, &e) == 0; i++ ) {
-		char *t;
-		t = acl_to_text(a, NULL);
-		if( t ) {
-			xar_prop_set(f, "acl/appleextended", t);
-			acl_free(t);
-		}
-		
-	}
-	acl_free(a);
-#endif /* !__APPLE__ */
-#endif
 	return 0;
 }
 
 static int32_t eacls(xar_t x, xar_file_t f, const char *file) {
-#ifdef HAVE_SYS_ACL_H
-#if !defined(__APPLE__)
 	const char *t;
 	acl_t a;
 	const char *type;
@@ -244,32 +214,6 @@ static int32_t eacls(xar_t x, xar_file_t f, const char *file) {
 			acl_free(a);
 		}
 	}
-#else /* !__APPLE__ */
-	const char *t;
-	acl_t a;
-
-	xar_prop_get(f, "acl/appleextended", &t);
-	if( t ) {
-		a = acl_from_text(t);
-		if( !a ) {
-			xar_err_new(x);
-			xar_err_set_errno(x, errno);
-			xar_err_set_string(x, "Error extracting access acl from toc");
-			xar_err_set_file(x, f);
-			xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-		} else {
-			if( acl_set_file(file, ACL_TYPE_ACCESS, a) != 0 ) {
-				xar_err_new(x);
-				xar_err_set_errno(x, errno);
-				xar_err_set_string(x, "Error setting access acl");
-				xar_err_set_file(x, f);
-				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-			}
-			acl_free(a);
-		}
-	}
-#endif /* !__APPLE__ */
-#endif
 	return 0;
 }
 
@@ -626,7 +570,6 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 		mset = 1;
 	}
 	if( opt && (strcmp(opt, "symlink") == 0) ) {
-#ifdef HAVE_LCHOWN
 		if( lchown(file, u, g) ) {
 			xar_err_new(x);
 			xar_err_set_file(x, f);
@@ -635,18 +578,7 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 			m &= ~S_ISUID;
 			m &= ~S_ISGID;
 		}
-#ifdef HAVE_LCHMOD
-		if( mset )
-			if( lchmod(file, m) ) {
-				xar_err_new(x);
-				xar_err_set_file(x, f);
-				xar_err_set_string(x, "perm: could not lchmod symlink");
-				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-			}
-#endif
-#endif 
-	} else {
-		if( chown(file, u, g) ) {
+		else if( chown(file, u, g) ) {
 			xar_err_new(x);
 			xar_err_set_file(x, f);
 			xar_err_set_string(x, "perm: could not chown file");

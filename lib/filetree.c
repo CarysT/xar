@@ -364,14 +364,15 @@ const char *xar_prop_next(xar_iter_t i) {
 
 	if( XAR_PROP(p)->parent ) {
 		char *tmp1, *tmp2;
-
-		if( strstr(XAR_ITER(i)->path, "/") ) {
-			tmp1 = tmp2 = XAR_ITER(i)->path;
-			XAR_ITER(i)->path = xar_safe_dirname(tmp2);
-			free(tmp1);
-		} else {
-			free(XAR_ITER(i)->path);
-			XAR_ITER(i)->path = NULL;
+		if (XAR_ITER(i)->path) {
+			if( strstr(XAR_ITER(i)->path, "/") ) {
+				tmp1 = tmp2 = XAR_ITER(i)->path;
+				XAR_ITER(i)->path = xar_safe_dirname(tmp2);
+				free(tmp1);
+			} else {
+				free(XAR_ITER(i)->path);
+				XAR_ITER(i)->path = NULL;
+			}
 		}
 
 		XAR_ITER(i)->iter = p = XAR_PROP(p)->parent;
@@ -638,7 +639,6 @@ void xar_prop_replicate_r(xar_file_t f, xar_prop_t p, xar_prop_t parent )
 		/* copy attributes for file */
 		for(a = property->attrs; a; a = a->next) {			
 			if( newprop->attrs == NULL ){
-				//last = xar_attr_new();
 				XAR_PROP(newprop)->attrs = last;				
 			}else{
 				XAR_ATTR(last)->next = xar_attr_new();
@@ -649,7 +649,7 @@ void xar_prop_replicate_r(xar_file_t f, xar_prop_t p, xar_prop_t parent )
 			if(a->value)
 				XAR_ATTR(last)->value = strdup(a->value);
 		}
-		free(last);
+		free((xar_attr_t*)last);
 		/* loop through the children properties and recursively add them */
 		xar_prop_replicate_r(f, property->children, newprop );		
 	}
@@ -834,7 +834,10 @@ xar_file_t xar_file_next(xar_iter_t i) {
 			asprintf(&XAR_ITER(i)->path, "%s/%s", tmp, name);
 			free(tmp);
 		} else
-			XAR_ITER(i)->path = strdup(name);
+			if (name != NULL)
+				XAR_ITER(i)->path = strdup(name);
+			else
+				XAR_ITER(i)->path = NULL;
 		XAR_ITER(i)->iter = f = XAR_FILE(f)->children;
 		goto FSUCCESS;
 	}
@@ -848,13 +851,15 @@ xar_file_t xar_file_next(xar_iter_t i) {
 	if( XAR_FILE(f)->parent ) {
 		char *tmp1, *tmp2;
 
-		if( strstr(XAR_ITER(i)->path, "/") ) {
-			tmp1 = tmp2 = XAR_ITER(i)->path;
-			XAR_ITER(i)->path = xar_safe_dirname(tmp2);
-			free(tmp1);
-		} else {
-			free(XAR_ITER(i)->path);
-			XAR_ITER(i)->path = NULL;
+		if (XAR_ITER(i)->path) {
+			if( strstr(XAR_ITER(i)->path, "/") ) {
+				tmp1 = tmp2 = XAR_ITER(i)->path;
+				XAR_ITER(i)->path = xar_safe_dirname(tmp2);
+				free(tmp1);
+			} else {
+				free(XAR_ITER(i)->path);
+				XAR_ITER(i)->path = NULL;
+			}
 		}
 
 		XAR_ITER(i)->iter = f = XAR_FILE(f)->parent;

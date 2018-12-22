@@ -59,8 +59,8 @@
 #include <sys/xattr.h>
 #endif
 
-#ifndef EXT3_SUPER_MAGIC
-#define EXT3_SUPER_MAGIC 0xEF53
+#ifndef EXT4_SUPER_MAGIC
+#define EXT4_SUPER_MAGIC	0xEF53
 #endif
 
 #ifndef JFS_SUPER_MAGIC
@@ -75,7 +75,7 @@
 #define XFS_SUPER_MAGIC 0x58465342
 #endif
 
-#if defined(HAVE_SYS_XATTR_H) && defined(HAVE_LGETXATTR) && !defined(__APPLE__)
+#if defined(HAVE_SYS_XATTR_H) && defined(HAVE_LGETXATTR)
 
 struct _linuxattr_context{
 	const char *file;
@@ -130,7 +130,7 @@ int32_t xar_linuxattr_write(xar_t x, xar_file_t f, void *buf, size_t len, void *
 
 int32_t xar_linuxattr_archive(xar_t x, xar_file_t f, const char* file, const char *buffer, size_t len)
 {
-#if defined(HAVE_SYS_XATTR_H) && defined(HAVE_LGETXATTR) && !defined(__APPLE__)
+#if defined(HAVE_SYS_XATTR_H) && defined(HAVE_LGETXATTR)
 	char *i, *buf = NULL;
 	int ret, retval=0, bufsz = 1024;
 	struct statfs sfs;
@@ -166,7 +166,7 @@ TRYAGAIN:
 	statfs(file, &sfs);
 
 	switch(sfs.f_type) {
-	case EXT3_SUPER_MAGIC: fsname = "ext3"; break; /* assume ext3 */
+	case EXT4_SUPER_MAGIC: fsname = "ext4"; break; /* assume ext4 */
 	case JFS_SUPER_MAGIC:  fsname = "jfs" ; break;
 	case REISERFS_SUPER_MAGIC:fsname = "reiser" ; break;
 	case XFS_SUPER_MAGIC:  fsname = "xfs" ; break;
@@ -198,7 +198,7 @@ BAIL:
 
 int32_t xar_linuxattr_extract(xar_t x, xar_file_t f, const char* file, char *buffer, size_t len)
 {
-#if defined HAVE_SYS_XATTR_H && defined(HAVE_LSETXATTR) && !defined(__APPLE__)
+#if defined HAVE_SYS_XATTR_H && defined(HAVE_LSETXATTR)
 	const char *fsname = "bogus";
 	struct statfs sfs;
 	int eaopt = 0;
@@ -224,7 +224,7 @@ int32_t xar_linuxattr_extract(xar_t x, xar_file_t f, const char* file, char *buf
 		free(bname);
 	}
 	switch(sfs.f_type) {
-	case EXT3_SUPER_MAGIC: fsname = "ext3"; break; /* assume ext3 */
+	case EXT4_SUPER_MAGIC: fsname = "ext4"; break; /* assume ext4 */
 	case JFS_SUPER_MAGIC:  fsname = "jfs" ; break;
 	case REISERFS_SUPER_MAGIC:fsname = "reiser" ; break;
 	case XFS_SUPER_MAGIC:  fsname = "xfs" ; break;

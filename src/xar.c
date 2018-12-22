@@ -1104,6 +1104,7 @@ int main(int argc, char *argv[]) {
 			ret = list(filename, arglen, args);
 			for( i = 0; i < arglen; i++ )
 				free(args[i]);
+			exit(ret);
 		case  6 :
 		case 's':
 			x = xar_open(filename, READ);

@@ -451,7 +451,7 @@ xar_t xar_open(const char *file, int32_t flags) {
 int xar_close(xar_t x) {
 	xar_attr_t a;
 	xar_file_t f;
-	int ret, retval = 0;
+	int retval = 0;
 
 	/* If we're creating an archive */
 	if( XAR(x)->heap_fd != -1 ) {
@@ -572,7 +572,7 @@ int xar_close(xar_t x) {
 				zs.next_out = ((unsigned char *)wbuf) + off;
 				zs.avail_out = wsize - off;
 
-				ret = deflate(&zs, Z_SYNC_FLUSH);
+				deflate(&zs, Z_SYNC_FLUSH);
 				off = wsize - zs.avail_out;
 			}
 	
@@ -1024,7 +1024,7 @@ static xar_file_t xar_add_r(xar_t x, xar_file_t f, const char *path, const char 
 	xar_file_t i = NULL, ret, ret2, start = NULL;
 	char *tmp1, *tmp2, *tmp3;
 
-	if( path && (path[0] == '\0') ) {
+	if( !path || (path && (path[0] == '\0')) ) {
 		return f;
 	}
 
@@ -1037,7 +1037,7 @@ static xar_file_t xar_add_r(xar_t x, xar_file_t f, const char *path, const char 
 		return ret2;
 	}
 
-	if( strcmp(tmp3, "..") == 0 ) {
+	if( tmp3 && strcmp(tmp3, "..") == 0 ) {
 		char *prefixstr;
 		if( !XAR(x)->skipwarn ) {
 			xar_err_new(x);
@@ -1052,7 +1052,7 @@ static xar_file_t xar_add_r(xar_t x, xar_file_t f, const char *path, const char 
 		return ret2;
 	}
 
-	if( strcmp(tmp3, ".") == 0 ) {
+	if( tmp3 && strcmp(tmp3, ".") == 0 ) {
 		if( tmp2 )
 			ret2 = xar_add_r(x, f, tmp2, prefix);
 		else
@@ -1071,7 +1071,7 @@ static xar_file_t xar_add_r(xar_t x, xar_file_t f, const char *path, const char 
 	for( i = start; i; i = XAR_FILE(i)->next ) {
 		const char *n;
 		xar_prop_get(i, "name", &n);
-		if( strcmp(n, tmp3) == 0 ) {
+		if( tmp3 && strcmp(n, tmp3) == 0 ) {
 			if( !tmp2 ) {
 				/* Node already exists, and it is i */
 				free(tmp1);
@@ -1526,15 +1526,14 @@ void xar_serialize(xar_t x, const char *file) {
 static int32_t xar_unserialize(xar_t x) {
 	xmlTextReaderPtr reader;
 	xar_file_t f = NULL;
-	const xmlChar *name, *prefix, *uri;
-	int type, noattr, ret;
+	const xmlChar *name;
+	int type, ret;
 
 	reader = xmlReaderForIO(toc_read_callback, close_callback, XAR(x), NULL, NULL, 0);
 	if( !reader ) return -1;
 
 	while( (ret = xmlTextReaderRead(reader)) == 1 ) {
 		type = xmlTextReaderNodeType(reader);
-		noattr = xmlTextReaderAttributeCount(reader);
 		name = xmlTextReaderConstLocalName(reader);
 		if( type != XML_READER_TYPE_ELEMENT )
 			continue;
@@ -1542,13 +1541,11 @@ static int32_t xar_unserialize(xar_t x) {
 			continue;
 		while( (ret = xmlTextReaderRead(reader)) == 1 ) {
 			type = xmlTextReaderNodeType(reader);
-			noattr = xmlTextReaderAttributeCount(reader);
 			name = xmlTextReaderConstLocalName(reader);
 			if( type == XML_READER_TYPE_ELEMENT ) {
 				if(strcmp((const char*)name, "toc") == 0) {
 					while( (ret = xmlTextReaderRead(reader)) == 1 ) {
 						type = xmlTextReaderNodeType(reader);
-						noattr = xmlTextReaderAttributeCount(reader);
 						name = xmlTextReaderConstLocalName(reader);
 						if( type == XML_READER_TYPE_ELEMENT ) {
 							if(strcmp((const char*)name, "file") == 0) {
@@ -1583,9 +1580,6 @@ static int32_t xar_unserialize(xar_t x) {
 					xar_attr_t a = NULL;
 					int i;
 
-					prefix = xmlTextReaderPrefix(reader);
-					uri = xmlTextReaderNamespaceUri(reader);
-
 					i = xmlTextReaderAttributeCount(reader);
 					if( i > 0 ) {
 						for(i = xmlTextReaderMoveToFirstAttribute(reader); i == 1; i = xmlTextReaderMoveToNextAttribute(reader)) {
@@ -1595,11 +1589,13 @@ static int32_t xar_unserialize(xar_t x) {
 							if( aname && (strcmp("subdoc_name", aname) == 0) ) {
 								name = (const unsigned char *)avalue;
 							} else {
-								xar_attr_t next = a;
-								a = xar_attr_new();
-								XAR_ATTR(a)->key = strdup(aname);
-								XAR_ATTR(a)->value = strdup(avalue);
-								XAR_ATTR(a)->next = next;
+								if (aname && avalue) {
+									xar_attr_t next = a;
+									a = xar_attr_new();
+									XAR_ATTR(a)->key = strdup(aname);
+									XAR_ATTR(a)->value = strdup(avalue);
+									XAR_ATTR(a)->next = next;
+								}
 							}
 						}
 					}

@@ -380,10 +380,8 @@ xar_signature_t xar_signature_unserialize(xar_t x, xmlTextReaderPtr reader)
 				}
 			}
 		}else if( type == XML_READER_TYPE_TEXT ) {
-
-			value = xmlTextReaderConstValue(reader);
+			xmlTextReaderConstValue(reader);
 			value = NULL; /* We don't want to accidentally release this const. */
-
 			break;
 		}else if( type == XML_READER_TYPE_END_ELEMENT ) {
 			break;
