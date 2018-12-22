@@ -360,8 +360,11 @@ static int extract(const char *filename, int arglen, char *args[]) {
 
 	if(Chdir) {
 		if( chdir(Chdir) != 0 ) {
-			fprintf(stderr, "Unable to chdir to %s\n", Chdir);
-			exit(1);
+			if (mkdir(Chdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+				fprintf(stderr, "Unable to chdir to %s\n", Chdir);
+				exit(1);
+			}
+			chdir(Chdir);
 		}
 	}
 
