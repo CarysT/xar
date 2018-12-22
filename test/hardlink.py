@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 
 import os
 import os.path
@@ -60,10 +60,10 @@ TEST_CASES = (hard_link_in_directory, hard_link_in_cwd, hard_link_identical_file
 if __name__ == "__main__":
 	for case in TEST_CASES:
 		try:
-			case("{f}.xar".format(f=case.func_name))
-			print("PASSED: {f}".format(f=case.func_name))
+			case("{f}.xar".format(f=case.__name__))
+			print("PASSED: {f}".format(f=case.__name__))
 		except (AssertionError, IOError, subprocess.CalledProcessError):
 			import sys, os
-			print("FAILED: {f}".format(f=case.func_name))
+			print("FAILED: {f}".format(f=case.__name__))
 			sys.excepthook(*sys.exc_info())
 			print("")

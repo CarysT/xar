@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Apple Computer, Inc.
+ * Copyright (c) 2018 Carys Tryhorn
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,9 +10,6 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of Apple nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- * 6-July-2006
- * DRI: Christopher Ryan <ryanc@apple.com>
+ * Portions Copyright 2006, Apple Computer, Inc.
+ * Christopher Ryan <ryanc@apple.com>
 */
 
 #ifndef _XAR_SIGNATURE_H_
@@ -52,20 +49,12 @@ struct __xar_signature_t {
 	xar_signer_callback signer_callback;		/* callback for signing */
 	void	*callback_context;					/* context for callback */
 	xar_t x;
-#ifdef __APPLE__
-    int is_extended;
-#endif
 };
 
 #define XAR_SIGNATURE(x) ((struct __xar_signature_t *)(x))
 
-#ifdef __APPLE__
-xar_signature_t xar_signature_new_internal(xar_t x, int is_extended, const char *type, int32_t length, xar_signer_callback callback, void *callback_context);
-#endif
-
 int32_t xar_signature_serialize(xar_signature_t sig, xmlTextWriterPtr writer);
 xar_signature_t xar_signature_unserialize(xar_t x, xmlTextReaderPtr reader);
-
 
 /* deallocates the link list of xar signatures */
 void xar_signature_remove(xar_signature_t sig);

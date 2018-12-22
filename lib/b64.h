@@ -1,7 +1,8 @@
 /*
  * Rob Braun <bbraun@synack.net>
  * 1-Oct-2004
- * Copyright (c) 2004 Rob Braun.  All rights reserved.
+ * Carys Tryhorn
+ * Copyright (c) 2018 Carys Tryhorn.  All rights reserved.
  */
 
 #ifndef _XAR_BASE64_H_

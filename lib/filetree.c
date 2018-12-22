@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2008 Rob Braun
+ * Copyright (c) 2018 Carys Tryhorn
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,9 +10,6 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of Rob Braun nor the names of his contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,10 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- * 03-Apr-2005
+ * 2005-2007
  * DRI: Rob Braun <bbraun@synack.net>
- */
-/*
  * Portions Copyright 2006, Apple Computer, Inc.
  * Christopher Ryan <ryanc@apple.com>
 */
@@ -629,7 +624,7 @@ void xar_prop_replicate_r(xar_file_t f, xar_prop_t p, xar_prop_t parent )
 	
 	/* look through properties */
 	for( property = p; property; property = property->next ){
-		xar_prop_t	newprop = xar_prop_new( f, parent );
+		xar_prop_t newprop = xar_prop_new( f, parent );
 		
 		/* copy the key value for the property */
 		XAR_PROP(newprop)->key = strdup(property->key);
@@ -638,12 +633,12 @@ void xar_prop_replicate_r(xar_file_t f, xar_prop_t p, xar_prop_t parent )
 		
 		/* loop through the attributes and copy them */
 		xar_attr_t a = NULL;
-		xar_attr_t last = NULL;
+		xar_attr_t last = xar_attr_new();
 		
 		/* copy attributes for file */
 		for(a = property->attrs; a; a = a->next) {			
-			if( NULL == newprop->attrs ){
-				last = xar_attr_new();
+			if( newprop->attrs == NULL ){
+				//last = xar_attr_new();
 				XAR_PROP(newprop)->attrs = last;				
 			}else{
 				XAR_ATTR(last)->next = xar_attr_new();
@@ -654,7 +649,7 @@ void xar_prop_replicate_r(xar_file_t f, xar_prop_t p, xar_prop_t parent )
 			if(a->value)
 				XAR_ATTR(last)->value = strdup(a->value);
 		}
-		
+		free(last);
 		/* loop through the children properties and recursively add them */
 		xar_prop_replicate_r(f, property->children, newprop );		
 	}

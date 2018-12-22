@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 
 import hashlib
 import os
@@ -95,7 +95,7 @@ def broken_toc_default_checksum(filename):
 	with util.archive_created(filename, "/bin") as path:
 		# Mess up the archive
 		toc_start = _get_header_size(path)
-		_clobber_bytes_at(range(toc_start + 4, toc_start + 4 + 100), path) # Why did the original test specify 4? No idea.
+		_clobber_bytes_at(list(range(toc_start + 4, toc_start + 4 + 100)), path) # Why did the original test specify 4? No idea.
 		
 		# Try to extract it
 		_verify_extraction_failed(filename)
@@ -104,7 +104,7 @@ def broken_toc_sha1_checksum(filename):
 	with util.archive_created(filename, "/bin", "--toc-cksum", "sha1") as path:
 		# Mess up the archive
 		toc_start = _get_header_size(path)
-		_clobber_bytes_at(range(toc_start + 4, toc_start + 4 + 100), path) # Why did the original test specify 4? No idea.
+		_clobber_bytes_at(list(range(toc_start + 4, toc_start + 4 + 100)), path) # Why did the original test specify 4? No idea.
 		
 		# Try to extract it
 		_verify_extraction_failed(filename)
@@ -113,7 +113,7 @@ def broken_toc_sha256_checksum(filename):
 	with util.archive_created(filename, "/bin", "--toc-cksum", "sha256") as path:
 		# Mess up the archive
 		toc_start = _get_header_size(path)
-		_clobber_bytes_at(range(toc_start + 4, toc_start + 4 + 100), path) # Why did the original test specify 4? No idea.
+		_clobber_bytes_at(list(range(toc_start + 4, toc_start + 4 + 100)), path) # Why did the original test specify 4? No idea.
 
 		# Try to extract it
 		_verify_extraction_failed(filename)
@@ -122,7 +122,7 @@ def broken_toc_sha512_checksum(filename):
 	with util.archive_created(filename, "/bin", "--toc-cksum", "sha512") as path:
 		# Mess up the archive
 		toc_start = _get_header_size(path)
-		_clobber_bytes_at(range(toc_start + 4, toc_start + 4 + 100), path) # Why did the original test specify 4? No idea.
+		_clobber_bytes_at(list(range(toc_start + 4, toc_start + 4 + 100)), path) # Why did the original test specify 4? No idea.
 
 		# Try to extract it
 		_verify_extraction_failed(filename)
@@ -133,7 +133,7 @@ def broken_heap_default_checksum(filename):
 		toc_start = _get_header_size(path)
 		toc_size = _get_toc_size(path)
 		# Why 32? That's the size of the default sha256 checksum, which is stored before the heap.
-		_clobber_bytes_at(range(toc_start + toc_size + 32, toc_start + toc_size + 32 + 100), path)
+		_clobber_bytes_at(list(range(toc_start + toc_size + 32, toc_start + toc_size + 32 + 100)), path)
 		
 		# Try to extract it
 		_verify_extraction_failed(filename)
@@ -216,10 +216,10 @@ TEST_CASES = (default_toc_checksum_validity, sha1_toc_checksum_validity, sha256_
 if __name__ == "__main__":
 	for case in TEST_CASES:
 		try:
-			case("{f}.xar".format(f=case.func_name))
-			print("PASSED: {f}".format(f=case.func_name))
+			case("{f}.xar".format(f=case.__name__))
+			print("PASSED: {f}".format(f=case.__name__))
 		except (AssertionError, IOError, subprocess.CalledProcessError):
 			import sys, os
-			print("FAILED: {f}".format(f=case.func_name))
+			print("FAILED: {f}".format(f=case.__name__))
 			sys.excepthook(*sys.exc_info())
 			print("")

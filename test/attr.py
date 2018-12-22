@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 
 import os
 import os.path
@@ -130,10 +130,10 @@ TEST_CASES = (small_xattr_empty_file, large_xattr_empty_file,
 if __name__ == "__main__":
 	for case in TEST_CASES:
 		try:
-			case(case.func_name)
-			print("PASSED: {f}".format(f=case.func_name))
+			case(case.__name__)
+			print("PASSED: {f}".format(f=case.__name__))
 		except (AssertionError, IOError, subprocess.CalledProcessError):
 			import sys, os
-			print("FAILED: {f}".format(f=case.func_name))
+			print("FAILED: {f}".format(f=case.__name__))
 			sys.excepthook(*sys.exc_info())
 			print("")

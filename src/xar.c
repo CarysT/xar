@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2007 Rob Braun
+ * Copyright (c) 2018 Carys Tryhorn
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,9 +10,6 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of Rob Braun nor the names of his contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,11 +24,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- * 03-Apr-2005
+ * 2005-2007
  * DRI: Rob Braun <bbraun@synack.net>
- * 2018
- * Carys Tryhorn <carys@carystryhorn.net>
 */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -461,6 +457,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		print_file(x,(xar_file_t)lnodei->str);
 		xar_extract(x, (xar_file_t)lnodei->str);
 	}
+	free(dirs);
 	if( args[0] && (files_extracted == 0) ) {
 		fprintf(stderr, "No files matched extraction criteria.\n");
 		Err = 3;

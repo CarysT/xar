@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 
-import cStringIO
+
+import io
 import os
 import os.path
 import subprocess
@@ -63,12 +63,12 @@ TEST_CASES = (no_compression, default_compression,
 if __name__ == "__main__":
 	for case in TEST_CASES:
 		try:
-			case("{f}.xar".format(f=case.func_name))
-			print("PASSED: {f}".format(f=case.func_name))
+			case("{f}.xar".format(f=case.__name__))
+			print("PASSED: {f}".format(f=case.__name__))
 		except (AssertionError, IOError, subprocess.CalledProcessError):
 			import sys, os
-			print("FAILED: {f}".format(f=case.func_name))
+			print("FAILED: {f}".format(f=case.__name__))
 			sys.excepthook(*sys.exc_info())
 			print("")
-		except util.TestCaseSkipError, e:
-			print("SKIPPED: {f}: {m}".format(f=case.func_name, m=e.message))
+		except util.TestCaseSkipError as e:
+			print("SKIPPED: {f}: {m}".format(f=case.__name__, m=e.message))

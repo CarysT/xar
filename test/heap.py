@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 
 import glob
 import os
@@ -69,10 +69,10 @@ TEST_CASES = (normal_heap, coalesce_heap)
 if __name__ == "__main__":
 	for case in TEST_CASES:
 		try:
-			case("{f}.xar".format(f=case.func_name))
-			print("PASSED: {f}".format(f=case.func_name))
+			case("{f}.xar".format(f=case.__name__))
+			print("PASSED: {f}".format(f=case.__name__))
 		except (AssertionError, IOError, subprocess.CalledProcessError):
 			import sys, os
-			print("FAILED: {f}".format(f=case.func_name))
+			print("FAILED: {f}".format(f=case.__name__))
 			sys.excepthook(*sys.exc_info())
 			print("")

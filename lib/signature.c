@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Apple Computer, Inc.
+ * Copyright (c) 2018 Carys Tryhorn
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,9 +10,6 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of Apple nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,8 +24,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- * 6-July-2006
- * DRI: Christopher Ryan <ryanc@apple.com>
+ * 2005-2007
+ * DRI: Rob Braun <bbraun@synack.net>
+ * Portions Copyright 2006, Apple Computer, Inc.
+ * Christopher Ryan <ryanc@apple.com>
 */
  
 #include <stdlib.h>
@@ -50,11 +49,7 @@ struct _signature_copy_context{
 	off_t offset;
 };
 
-#ifdef __APPLE__
-xar_signature_t xar_signature_new_internal(xar_t x, int is_extended, const char *type, int32_t length, xar_signer_callback callback, void *callback_context)
-#else
 xar_signature_t xar_signature_new(xar_t x,const char *type, int32_t length, xar_signer_callback callback, void *callback_context)
-#endif
 {
 	xar_signature_t ret;
 		
@@ -75,9 +70,6 @@ xar_signature_t xar_signature_new(xar_t x,const char *type, int32_t length, xar_
 	XAR_SIGNATURE(ret)->offset = XAR(x)->heap_offset;
 	XAR_SIGNATURE(ret)->signer_callback = callback;
 	XAR_SIGNATURE(ret)->callback_context = callback_context;
-#ifdef __APPLE__
-    XAR_SIGNATURE(ret)->is_extended = is_extended;
-#endif
 	
 	/* Pre allocate space in the heap */
 	XAR(x)->heap_offset += length;
@@ -103,20 +95,9 @@ xar_signature_t xar_signature_new(xar_t x,const char *type, int32_t length, xar_
 	
 }
 
-#ifdef __APPLE__
-xar_signature_t xar_signature_new(xar_t x,const char *type, int32_t length, xar_signer_callback callback, void *callback_context)
-{
-    return xar_signature_new_internal(x, 0, type, length, callback, callback_context);
-}
-#endif
-
 xar_signature_t xar_signature_new_extended(xar_t x,const char *type, int32_t length, xar_signer_callback callback, void *callback_context)
 {
-#ifdef __APPLE__
-    return xar_signature_new_internal(x, 1, type, length, callback, callback_context);
-#else
     return xar_signature_new(x, type, length, callback, callback_context);
-#endif
 }
 
 const char *xar_signature_type(xar_signature_t s)
@@ -137,7 +118,7 @@ int32_t xar_signature_add_x509certificate(xar_signature_t sig, const uint8_t *ce
 
 	newcert = malloc(sizeof(struct __xar_x509cert_t));
 	memset(newcert, 0, sizeof(struct __xar_x509cert_t));
-	newcert->content = malloc(sizeof(const char)*cert_len);
+	newcert->content = malloc(sizeof(const uint8_t)*cert_len);
 	memcpy(newcert->content,cert_data,cert_len);
 	newcert->len = cert_len;
 	
@@ -267,7 +248,7 @@ uint8_t xar_signature_copy_signed_data(xar_signature_t sig, uint8_t **data, uint
 		}
 	
 		if(data) {
-			*data = malloc(sizeof(char)*(*length));
+			*data = malloc(sizeof(uint8_t)*(*length));
 
 			_xar_signature_read_from_heap(x, offset, *length, *data);
 		}
@@ -286,21 +267,17 @@ uint8_t xar_signature_copy_signed_data(xar_signature_t sig, uint8_t **data, uint
 		*signed_length  = XAR_SIGNATURE(sig)->len;
 		
 		if(signed_data) {
-			*signed_data = malloc(sizeof(char)*(*signed_length));
+			*signed_data = malloc(sizeof(uint8_t)*(*signed_length));
 	
 			_xar_signature_read_from_heap(x, offset, *signed_length, *signed_data);
 		}
 	}
-				
 	return 0;
 }
 
 xar_signature_t xar_signature_unserialize(xar_t x, xmlTextReaderPtr reader)
 {
 	struct __xar_signature_t *ret = NULL;
-#ifdef __APPLE__
-    const xmlChar *sig_type = NULL;
-#endif
 	const xmlChar *value = NULL;
 	const xmlChar *name = NULL;
 	int type;
@@ -308,20 +285,12 @@ xar_signature_t xar_signature_unserialize(xar_t x, xmlTextReaderPtr reader)
 	
 	ret = malloc(sizeof(struct __xar_signature_t));
 	
-	if( ! ret )
+	if( !ret )
 		return NULL;
 	
 	memset(ret, 0, sizeof(struct __xar_signature_t));
 	
 	ret->x = x;
-	
-	/* Read One Signature Element */
-#ifdef __APPLE__
-    sig_type = xmlTextReaderConstLocalName(reader);
-    if(strcmp((const char*)sig_type, "x-signature") == 0) {
-        ret->is_extended = 1;
-    }
-#endif
 		
 	/* Retrieve the type attr */
 	value = xmlTextReaderGetAttribute(reader, (const xmlChar*)"style");
@@ -346,7 +315,7 @@ xar_signature_t xar_signature_unserialize(xar_t x, xmlTextReaderPtr reader)
 					type = xmlTextReaderNodeType(reader);
 					if( type == XML_READER_TYPE_TEXT ) {
 						
-						value = xmlTextReaderConstValue(reader);				
+						value = xmlTextReaderConstValue(reader);
 						ret->len = strtoull( (const char *)value, (char **)NULL, 10);
 						value = NULL; /* We don't want to accidentally release this const. */	
 					}else if( type == XML_READER_TYPE_END_ELEMENT ) {
@@ -358,7 +327,7 @@ xar_signature_t xar_signature_unserialize(xar_t x, xmlTextReaderPtr reader)
 					type = xmlTextReaderNodeType(reader);
 					if( type == XML_READER_TYPE_TEXT ) {
 						
-						value = xmlTextReaderConstValue(reader);				
+						value = xmlTextReaderConstValue(reader);
 						ret->offset = strtoull( (const char *)value, (char **)NULL, 10);
 						value = NULL; /* We don't want to accidentally release this const. */
 					}else if( type == XML_READER_TYPE_END_ELEMENT ) {
@@ -389,31 +358,27 @@ xar_signature_t xar_signature_unserialize(xar_t x, xmlTextReaderPtr reader)
 												sig_data = xar_from_base64(value, strlen((const char *)value), &outputLength);
 												
 												if(sig_data){
-                                                    /* for convience we just use the same method, which means multiple allocations */
-                                                    xar_signature_add_x509certificate(ret, sig_data, outputLength);
-                                                    free(sig_data);
-                                                }else{
-                                                    ret = NULL;
-                                                }
+													/* for convience we just use the same method, which means multiple allocations */
+													xar_signature_add_x509certificate(ret, sig_data, outputLength);
+													free(sig_data);
+												}
 												
 												value = NULL; /* We don't want to accidentally release this const. */
-												//break;
 											}else if( type == XML_READER_TYPE_END_ELEMENT ) {
 												break;
 											}
-										}										
+										}
 									}
 								}else if( type == XML_READER_TYPE_END_ELEMENT ) {
 									break;
 								}
-							}							
+							}
 						}
 					}else if( type == XML_READER_TYPE_END_ELEMENT ) {
 						break;
 					}
-					
 				}
-			}			
+			}
 		}else if( type == XML_READER_TYPE_TEXT ) {
 
 			value = xmlTextReaderConstValue(reader);
@@ -450,12 +415,7 @@ int32_t xar_signature_serialize(xar_signature_t sig, xmlTextWriterPtr writer)
 	if( !sig ) return 0;
 
 	/* <signature type='EncryptionAlgorithm'> */
-#ifdef __APPLE__
-    const char* element_name = XAR_SIGNATURE(sig)->is_extended ? "x-signature" : "signature";
-	xmlTextWriterStartElementNS( writer, NULL, BAD_CAST(element_name), NULL);
-#else
-	xmlTextWriterStartElementNS( writer, NULL, BAD_CAST("signature"), NULL);		
-#endif
+	xmlTextWriterStartElementNS( writer, NULL, BAD_CAST("signature"), NULL);
 	
 	/* write out the style */
 	xmlTextWriterWriteAttribute(writer, BAD_CAST("style"), BAD_CAST(XAR_SIGNATURE(sig)->type));

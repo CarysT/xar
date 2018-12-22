@@ -1,5 +1,6 @@
+
 /*
- * Copyright (c) 2007 Rob Braun
+ * Copyright (c) 2005-2007 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,15 +30,13 @@
 /*
  * 03-Apr-2005
  * DRI: Rob Braun <bbraun@synack.net>
- */
-/*
  * Portions Copyright 2003, Apple Computer, Inc.
  * filetype_name() and associated structure.
  * DRI: Kevin Van Vechten <kvv@apple.com>
- */
-/*
  * Portions Copyright 2006, Apple Computer, Inc.
  * Christopher Ryan <ryanc@apple.com>
+ * 2018
+ * Carys Tryhorn <carys@carystryhorn.net>
 */
 
 #define _FILE_OFFSET_BITS 64
